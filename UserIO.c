@@ -65,7 +65,7 @@ void UserIO(void){					// interfata cu utilizatorul
 				// extrage dest din tasta
 				dest = tasta - '0';
 				// daca comanda e '1' si adresa e intre '0' - '4', mai putin adresa proprie
-				if((cmd == '1') && (dest != ADR_NOD) && (dest <= 4 && dest >= 0){
+				if((cmd == '1') && (dest != ADR_NOD) && (dest <= 4 && dest >= 0)){
 					// Daca este deja un mesaj in buffer ...
 					if(retea[dest].full){
 						// afiseaza Buffer plin
@@ -95,7 +95,7 @@ void UserIO(void){					// interfata cu utilizatorul
 					STARE_IO = 2;
 				}
 				// daca comanda e '2' si adresa e intre '0'-'4'
-				if((cmd == '2') && (dest <= 4 && dest >= 0){
+				if((cmd == '2') && (dest <= 4 && dest >= 0)){
 					// extrage dest din tasta
 					dest = tasta - '0';
 					// Daca este deja un mesaj in buffer ...

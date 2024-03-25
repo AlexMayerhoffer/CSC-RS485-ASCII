@@ -59,7 +59,7 @@ void main (void) {
 							LCD_Home();
 							LCD_Clear();
 							LCD_PutStr(0,0,"Regenerare jeton");
-							UART1_PutStr("Regenerare jeton");
+							UART1_Putstr("Regenerare jeton");
 							// nodul curent detine jetonul
 							TIP_NOD = JETON;
 							// Daca e permisa afisarea, afiseaza meniul de comenzi
@@ -70,10 +70,7 @@ void main (void) {
 						break;
 
 					case ROK: // a primit un mesaj USER_MES, il afiseaza
-						LCD_Home();
-						LCD_Clear();
-						LCD_PutStr(0,0,"Rx MSG:");
-						LCD_PutStr(0,1,retea[ADR_NOD].bufbin.date);
+						Afisare_mesaj();
 						break;
 					case JOK:										// a primit un jetonul
 						Delay(WAIT/2);						// asteapta WAIT/2 ms

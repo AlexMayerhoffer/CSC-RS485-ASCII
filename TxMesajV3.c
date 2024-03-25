@@ -2,7 +2,8 @@
 #include <uart1.h>
 #include <Protocol.h>
 #include <UserIO.h>
-
+#define CR 0x0D;
+#define LF 0x0A;
 extern unsigned char TIP_NOD;			// tip nod initial: Nu Master, Nu Jeton
 
 extern nod retea[];
@@ -15,8 +16,8 @@ void bin2ascii(unsigned char ch, unsigned char *ptr);	// functie de conversie oc
 //***********************************************************************************************************
 void TxMesaj(unsigned char i){					// transmite mesajul din buffer-ul i
 	unsigned char sc, *ptr, ch, j;
-	
-	if(retea[i].bufbin.tipmes==0){					// daca este un mesaj POLL_MES sau JET_MES (au aceeasi valoare)
+	sc = 0;
+	if(retea[i].bufbin.tipmes==JET_MES || retea[i].bufbin.tipmes==POLL_MES){					// daca este un mesaj POLL_MES sau JET_MES (au aceeasi valoare)
 		sc = retea[i].bufbin.adresa_hw_dest + retea[i].bufbin.adresa_hw_src;// calculeaza direct sc
 	}
 	else{																		// altfel...
@@ -26,7 +27,8 @@ void TxMesaj(unsigned char i){					// transmite mesajul din buffer-ul i
 		sc += retea[i].bufbin.src;						// ia in calcul adresa nodului sursa al mesajului
 		sc += retea[i].bufbin.dest;						// ia in calcul adresa nodului destinatie al mesajului
 		sc += retea[i].bufbin.lng;						// ia in calcul lungimea datelor
-		sc += retea[i].bufbin.date[NR_CHAR_MAX];//NR_CHAR_MAX		// ia in calcul datele
+		for(j=0; j<retea[i].bufbin.lng;j++)		// ia in calcul datele
+				sc += retea[i].bufbin.date[j];														
 	}
 		retea[i].bufbin.sc = sc;							// stocheaza suma de control
  																				
@@ -37,24 +39,22 @@ void TxMesaj(unsigned char i){					// transmite mesajul din buffer-ul i
 		bin2ascii(retea[i].bufbin.tipmes, ptr);								// pune in bufasc tipul mesajului
 		ptr += 2;
 	
-		if(retea[i].bufbin.tipmes == USER_MES){ 												// daca este un mesaj de date (USER_MES)
+		if(retea[i].bufbin.tipmes){ 													// daca este un mesaj de date (USER_MES)
 			bin2ascii(retea[i].bufbin.src, ptr);								// pune in bufasc src
 			ptr += 2;																										
 			bin2ascii(retea[i].bufbin.dest, ptr);								// pune in bufasc dest
 			ptr += 2;																										
 			bin2ascii(retea[i].bufbin.lng, ptr);								// pune in bufasc lng date
-			ptr += 2;
-			for(j = 0; j < retea[i].bufbin.lng; j++){																														
+			ptr += 2;			
+			for(j=0; j<retea[i].bufbin.lng;j++){
 				bin2ascii(retea[i].bufbin.date[j], ptr);								// pune in bufasc datele
-				ptr +=	2;
-			}																				
+				ptr+=2;
+			}																			
 		}																									
 																											
-		bin2ascii(retea[i].bufbin.sc, ptr);				// pune in bufasc SC
-		ptr += 2;																											
-		*ptr++ = 0x0D;															// pune in bufasc CR
-		*ptr++ = 0x0A;															// pune in bufasc LF
-
+		bin2ascii(retea[i].bufbin.sc, ptr);				// pune in bufasc SC																									
+		*ptr++ = CR;															// pune in bufasc CR
+		*ptr++ = LF;															// pune in bufasc LF
 		
 		UART1_MultiprocMode(MULTIPROC_ADRESA);		// urmeaza transmisia octetului de adresa (mod MULTIPROC_ADRESA)
 		UART1_TxRxEN(1, 1);												// valideaza Tx si Rx UART1
@@ -63,7 +63,7 @@ void TxMesaj(unsigned char i){					// transmite mesajul din buffer-ul i
 		ptr = retea[i].bufasc;										// reinitializare pointer
 		UART1_Putch(*ptr);												// transmite adresa HW dest
 	
-		if(UART1_Getch_TMO(2) != *ptr){			// daca caracterul primit e diferit de cel transmis ...
+		if(UART1_Getch_TMO(2) != *ptr || timeout){			// daca caracterul primit e diferit de cel transmis ...
 			UART1_TxRxEN(0, 0);										// dezactivare Tx si Rx UART1
 			UART1_RS485_XCVR(0, 0);								// dezactivare Tx si Rx RS485
 			Error("Detectie coliziune!");					// afiseaza Eroare coliziune
@@ -79,7 +79,7 @@ void TxMesaj(unsigned char i){					// transmite mesajul din buffer-ul i
 			UART1_Putch(*(++ptr));								// transmite si ultimul caracter
 			UART1_TxRxEN(1, 1);										// activare Rx UART1
 		
-			if(TIP_NOD == 0)											//nodul master nu goleste bufferul
+			if(TIP_NOD == JETON)											//nodul master nu goleste bufferul
 				retea[i].full = 0;																		
 			UART1_Getch(0);												// asteapta terminarea transmisiei/receptiei ultimului caracter
 																						
