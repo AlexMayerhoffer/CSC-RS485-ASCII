@@ -37,8 +37,6 @@ void UserIO(void){					// interfata cu utilizatorul
 				
 							case '1': 											// s-a dat comanda de transmisie mesaj								
 									// afiseaza Tx Msg:> Nod =
-									LCD_Home();
-									LCD_Clear();
 									LCD_PutStr(0,0,"Tx MSG:> Nod =");
 									// blocheaza afisarea (AFISARE = 0)
 									AFISARE = 0;
@@ -50,6 +48,7 @@ void UserIO(void){					// interfata cu utilizatorul
 							
 							case '2': 											// s-a dat comanda de afisare Stare Nod:
 								// blocheaza afisarea (AFISARE = 0)
+								// TODO stare not print
 								AFISARE = 0;
 								// trece in starea 1
 								STARE_IO = 1;
@@ -69,7 +68,7 @@ void UserIO(void){					// interfata cu utilizatorul
 					// Daca este deja un mesaj in buffer ...
 					if(retea[dest].full){
 						// afiseaza Buffer plin
-						Error("\n\rBuffer plin");
+						LCD_PutStr(0,0,"Buffer plin");
 					}
 					// trece in starea 0, s-a terminat tratarea comenzii '1'
 					STARE_IO = 0;
@@ -100,13 +99,14 @@ void UserIO(void){					// interfata cu utilizatorul
 					dest = tasta - '0';
 					// Daca este deja un mesaj in buffer ...
 					if(retea[ADR_NOD].full){
+						// TODO afisari direct fara error
 						// Afiseaza Buffer plin
-						Error("\n\rBuffer plin");
+						LCD_PutStr(0,0,"Buffer plin");
 					}
 					// altfel
 					else{
 						// Afiseaza Buffer gol
-						Error("\n\rBuffer gol");
+						LCD_PutStr(0,0,"Buffer gol");
 					}
 					// trece in starea 0, s-a terminat tratarea comenzii
 					STARE_IO = 0;
